@@ -1,508 +1,965 @@
 
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>CAT • Cultural Activity Team — RNSIT</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>CAT • Cultural Activity Team | RNSIT</title>
+  <meta name="description" content="CAT RNSIT — Register for events, explore committees, meet the crew, and get updates." />
 
-  <!-- Base Styles: Glassmorphism + vibrant cultural theme -->
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"/>
+
+  <!-- anime.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+
   <style>
-    :root {
-      --bg: #0b0f19;
-      --text: #eaf2ff;
-      --primary: #ff5f6d;
-      --secondary: #ffc371;
-      --accent: #6a5acd;
-      --glass-bg: rgba(255,255,255,0.08);
-      --glass-border: rgba(255,255,255,0.22);
+    /* ===== Neon Theme (mobile-first) ===== */
+    :root{
+      --bg:#0a0f1d; --text:#e6eaf7; --muted:#b9c7de;
+      --card:rgba(255,255,255,0.08); --glass:rgba(255,255,255,0.12); --border:rgba(255,255,255,0.16);
+      --c1:#ff5bd4; --c2:#64d2ff; --c3:#9a7dff; --c4:#55ffd7; --c5:#ffd166;
+      --grad-1:linear-gradient(135deg,var(--c1),var(--c3));
+      --grad-2:linear-gradient(135deg,var(--c4),var(--c2));
+      --radius:16px; --shadow:0 16px 48px rgba(0,0,0,0.55);
+      --font-head:"Baloo 2",system-ui; --font-body:"Inter",system-ui;
     }
-    * { box-sizing: border-box; }
-    html, body {
-      height:100%; margin:0; color:var(--text);
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Noto Sans", sans-serif;
-      background: radial-gradient(1200px circle at 10% 10%, #1a2238 0, var(--bg) 45%, var(--bg) 100%);
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;padding:0;background:
+        radial-gradient(900px 480px at 8% -10%, rgba(154,125,255,0.18), transparent 60%),
+        radial-gradient(900px 480px at 92% 110%, rgba(85,255,215,0.18), transparent 60%),
+        var(--bg);
+      color:var(--text); font-family:var(--font-body); overflow-x:hidden
     }
-    .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
-    .glass {
-      background: var(--glass-bg); border: 1px solid var(--glass-border);
-      box-shadow: 0 8px 32px rgba(31,38,135,.37);
-      backdrop-filter: blur(12px) saturate(140%); -webkit-backdrop-filter: blur(12px) saturate(140%);
-      border-radius: 16px;
-    }
-    .btn {
-      border: 1px solid var(--glass-border); color: var(--text);
-      padding: 10px 14px; border-radius: 12px; cursor: pointer; background: var(--glass-bg);
-      transition: transform .2s ease, box-shadow .2s ease, background .2s ease; display:inline-block;
-    }
-    .btn:hover { transform: translateY(-2px); box-shadow: 0 18px 32px rgba(0,0,0,.35); }
+    a{color:inherit;text-decoration:none}
+    img{max-width:100%;display:block}
+    .container{width:min(1100px,92vw);margin:0 auto}
 
-    header.nav { display:flex; gap:12px; padding:12px 24px; align-items:center; justify-content:space-between; }
-    header.nav a { color:var(--text); text-decoration:none; opacity:.9; margin:0 10px; }
-    header.nav a:hover { opacity:1; }
-    .brand { font-weight:800; font-size:18px; }
+    /* ===== Top doodle loader ===== */
+    #doodleLoader{position:fixed;top:0;left:0;width:100%;height:10px;z-index:9999;display:none}
+    #doodleLoader svg{width:100%;height:100%}
+    #doodleLoader path{stroke:url(#g);stroke-width:4;fill:none;stroke-linecap:round;stroke-dasharray:160 24;stroke-dashoffset:220;animation:dash 1.1s ease-in-out infinite}
+    @keyframes dash{to{stroke-dashoffset:0}}
 
-    .hero { display:grid; gap:18px; grid-template-columns: 1.2fr .8fr; align-items:center; }
-    h1.hero-title {
-      font-size: clamp(32px, 4.5vw, 56px); font-weight: 900; letter-spacing: 0.5px;
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      -webkit-background-clip:text; background-clip:text; color:transparent;
-    }
-    .muted { font-size:12px; opacity:.8; }
-    .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap:16px; }
-    .card { padding:16px; }
-    label { font-size:12px; opacity:.85; display:block; }
-    input, textarea, select {
-      width:100%; background: rgba(255,255,255,.07); color:var(--text);
-      border:1px solid var(--glass-border); border-radius:10px; padding:10px; margin-top:6px;
-    }
-    footer { text-align:center; padding:24px; opacity:.7; }
+    /* ===== Navbar ===== */
+    .nav{position:sticky;top:10px;z-index:50;margin:14px auto;border-radius:16px;background:var(--glass);border:1px solid var(--border);box-shadow:var(--shadow)}
+    .nav-inner{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;flex-wrap:wrap;gap:8px}
+    .brand{display:flex;align-items:center;gap:10px;font-family:var(--font-head);font-weight:700}
+    .brand-logo{width:34px;height:34px;border-radius:10px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 18px rgba(154,125,255,0.4)}
+    .brand-logo img{width:100%;height:100%;object-fit:cover}
+    .brand span{background:var(--grad-1);-webkit-background-clip:text;background-clip:text;color:transparent}
 
-    .aura {
-      position: fixed; inset: -10%; pointer-events:none; filter: blur(60px) saturate(150%);
-      background:
-        radial-gradient(600px at 20% 20%, rgba(255,95,109,.18), transparent 60%),
-        radial-gradient(600px at 80% 10%, rgba(106,90,205,.18), transparent 60%),
-        radial-gradient(600px at 50% 80%, rgba(255,195,113,.18), transparent 60%);
-      z-index:-1;
-    }
-    .reveal { opacity:0; transform: translateY(18px); }
+    .actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;position:relative}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;border:1px solid var(--border);cursor:pointer;background:var(--card);color:var(--text);font-weight:700;position:relative;overflow:hidden}
+    .btn-primary{background:var(--grad-1);color:#0a0f1d}
+    .btn-outline{background:var(--card)}
 
-    /* simple status area for error messages */
-    #status { margin: 12px 0; font-size: 12px; color: #ffd1d1; }
+    /* Search (mobile fix: shrink & stack) */
+    .nav-search{display:flex;gap:6px;align-items:center;flex:1;max-width:420px;margin:8px 0}
+    .nav-search input{flex:1;background:#0e1530;border:1px solid var(--border);border-radius:10px;padding:8px 10px;color:var(--text)}
+    @media (max-width:560px){
+      .nav-search{ max-width:100%; order:3; }
+      #signInBtn{ font-size:.9rem; padding:8px 10px; }
+      .actions{ gap:6px; }
+    }
+
+    /* User badge + dropdown menu */
+    #userBadge{display:none;align-items:center;gap:8px;color:#cfe1ff;background:rgba(255,255,255,0.08);border:1px solid var(--border);padding:6px 10px;border-radius:999px;cursor:pointer}
+    #userBadge img{width:26px;height:26px;border-radius:50%;object-fit:cover;border:1px solid var(--border)}
+    .user-menu{
+      position:absolute; right:12px; top:58px; z-index:100;
+      background:rgba(10,16,34,0.95); border:1px solid var(--border); border-radius:12px; min-width:200px; display:none; box-shadow:var(--shadow);
+    }
+    .user-menu.open{display:block}
+    .user-menu button{width:100%; text-align:left; border:0; background:transparent; color:var(--text); padding:10px 12px; cursor:pointer}
+    .user-menu button:hover{background:rgba(255,255,255,0.08)}
+    .user-menu .small{font-size:.9rem;color:#b9c7de;padding:8px 12px}
+
+    /* ===== Hero 3D ===== */
+    .hero{margin:14px auto; position:relative}
+    .hero-3d{
+      position:relative; height:220px; border-radius:16px; overflow:hidden;
+      background:linear-gradient(135deg, rgba(255,91,212,0.15), rgba(154,125,255,0.15));
+      border:1px solid var(--border);
+      box-shadow:var(--shadow);
+      perspective:900px;
+    }
+    .layer{position:absolute; inset:0; transform-style:preserve-3d}
+    .blob{position:absolute; width:160px; height:160px; border-radius:40px;
+      background:radial-gradient(circle at 30% 30%, rgba(85,255,215,0.6), transparent 60%); filter:blur(8px);
+    }
+    .blob.pink{background:radial-gradient(circle at 30% 30%, rgba(255,91,212,0.6), transparent 60%)}
+    .blob.blue{background:radial-gradient(circle at 30% 30%, rgba(100,210,255,0.6), transparent 60%)}
+    .hero-card{position:relative; margin-top:-60px; background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow)}
+    .hero h1{font-family:var(--font-head);font-weight:900;font-size:clamp(1.8rem,4.8vw,3rem);line-height:1.06;margin:0 0 8px}
+    .hero .sub{color:var(--muted);margin:0 0 12px}
+    .cta{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    @media (min-width:768px){ .cta{display:flex;gap:10px;flex-wrap:wrap} }
+
+    /* ===== Sections ===== */
+    section{margin:24px auto}
+    .section-title{font-family:var(--font-head);font-weight:900;font-size:clamp(1.4rem,4.2vw,2.2rem);margin-bottom:8px;color:#cfe1ff}
+    .section-sub{color:var(--muted);margin:-4px 0 18px}
+
+    /* ===== Cards / Grids ===== */
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .card{background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:12px}
+    .card h3{margin:0 0 6px;font-weight:800}
+    .card p{color:var(--muted);margin:0 0 10px}
+    .card .meta{display:flex;gap:8px;color:#9bd4ff;font-weight:700;flex-wrap:wrap}
+    .badge{background:rgba(255,255,255,0.08);border:1px solid var(--border);padding:6px 10px;border-radius:999px;color:#cfe1ff;font-weight:700}
+    .hero-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+    @media (max-width:560px){ .grid{grid-template-columns:1fr} }
+
+    /* ===== Committees — fixed grid (no dropdown) ===== */
+    .committees{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+    @media (min-width:768px){ .committees{grid-template-columns:repeat(4,1fr)} }
+    .committee{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:12px;text-align:center;cursor:pointer}
+    .committee .icon{font-size:24px;margin-bottom:6px;color:#9bd4ff}
+    .committee h4{margin:4px 0;font-weight:800}
+    .committee p{color:#b9c7de;font-size:.95rem}
+
+    /* ===== Crew (members) — dropdown filter ONLY here ===== */
+    .crew-filter{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+    .crew-filter select{background:#0e1530;border:1px solid var(--border);border-radius:10px;padding:8px;color:var(--text)}
+    .crew{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media (min-width:768px){ .crew{grid-template-columns:repeat(4,1fr)} }
+    .member{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:10px;text-align:center}
+    .member img{width:70px;height:70px;border-radius:14px;margin:8px auto;object-fit:cover;border:1px solid var(--border)}
+    .member .name{font-weight:900}
+    .member .role{color:#9bd4ff;font-weight:700;margin-top:2px}
+
+    /* ===== Modals & Drawer ===== */
+    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(10,16,34,0.55);backdrop-filter:blur(10px);z-index:1000}
+    .modal.open{display:flex}
+    .modal-card{width:min(760px,92vw);background:rgba(10,16,34,0.92);border:1px solid var(--border);border-radius:18px;padding:14px;box-shadow:var(--shadow)}
+    .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+    .modal-title{font-weight:900}
+    .close{cursor:pointer;opacity:.85}
+
+    .drawer{position:fixed;left:0;right:0;bottom:-100%;background:rgba(10,16,34,0.92);border-top:1px solid var(--border);border-radius:18px 18px 0 0;box-shadow:0 -20px 50px rgba(0,0,0,0.45);padding:14px;z-index:1001}
+    .drawer.open{bottom:0}
+    .drawer h4{margin:0 0 8px}
+    .dept-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    @media (min-width:768px){ .dept-grid{grid-template-columns:repeat(3,1fr)} }
+    .dept-chip{background:rgba(255,255,255,0.08);border:1px solid var(--border);padding:10px;border-radius:12px;text-align:center;cursor:pointer}
+
+    /* ===== Forms ===== */
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .form-row{display:flex;flex-direction:column;gap:6px}
+    label{font-weight:700}
+    input,select,textarea{background:#0e1530;border:1px solid var(--border);border-radius:10px;padding:10px;color:var(--text)}
+    textarea{min-height:90px}
+    .terms{font-size:.95rem;color:var(--muted)}
+    .error{color:#ff7b7b;font-size:.9rem;min-height:18px}
+    @media (max-width:560px){ .form-grid{grid-template-columns:1fr} }
+
+    /* Profile modal fit */
+    #profileCard { max-height: 80vh; overflow:auto; }
+    @media (max-width:560px){ #profileCard { padding:12px; } }
+
+    /* ===== Chat ===== */
+    .chat-launch{position:fixed;right:14px;bottom:14px;z-index:60;background:var(--grad-2);color:#0a0f1d;border-radius:999px;padding:12px 14px;box-shadow:var(--shadow);cursor:pointer;font-weight:900}
+    .chat{position:fixed;right:14px;bottom:70px;width:min(360px,92vw);max-height:62vh;z-index:60;background:rgba(10,16,34,0.92);border:1px solid var(--border);border-radius:16px;display:none;flex-direction:column;overflow:hidden}
+    .chat.open{display:flex}
+    .chat-header{display:flex;align-items:center;justify-content:space-between;padding:10px;border-bottom:1px solid var(--border)}
+    .chat-body{padding:10px;display:flex;flex-direction:column;gap:8px;overflow:auto}
+    .bubble{background:rgba(255,255,255,0.10);border:1px solid var(--border);border-radius:10px;padding:10px}
+    .bubble.me{background:linear-gradient(135deg, rgba(85,255,215,0.22), rgba(154,125,255,0.22))}
+    .chat-form{display:flex;gap:8px;padding:10px;border-top:1px solid var(--border)}
+    .chat-form input{flex:1}
+
+    /* ===== FAQ ===== */
+    .faq{background:var(--glass);border:1px solid var(--border);border-radius:16px;padding:12px}
+    .faq details{background:rgba(255,255,255,0.08);border:1px solid var(--border);border-radius:12px;padding:10px;margin:8px 0}
+    .faq summary{cursor:pointer;font-weight:800;color:#cfe1ff}
+
+    /* ===== Footer ===== */
+    footer{border-top:1px solid var(--border);background:rgba(255,255,255,0.06);padding:16px 0;margin:24px 0 40px}
+    .footer-inner{display:flex;justify-content:space-between;align-items:center;color:var(--muted)}
+    @media (max-width:560px){ .footer-inner{flex-direction:column;gap:8px} }
   </style>
-
-  <!-- Anime.js (UMD global) -->
-  <script src="https://cdn.jsdelivr.net/npm/animejs@4.2.2/dist/bundles/anime.umd.min.js"></script>
-  <!-- (Optional) Three.js (global) for small floating 3D props -->
-  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
-
-  <!-- Firebase v12 (modular CDN) + App code -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-    import { getAnalytics, isSupported as analyticsSupported } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-analytics.js";
-    import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
-    import {
-      getFirestore, collection, doc, setDoc, getDocs, updateDoc,
-      query, where, orderBy, limit, onSnapshot, serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
-
-    // 🔐 REPLACE THIS WITH YOUR Firebase Web App config (from Firebase Console)
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT.firebaseapp.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT_ID.firebasestorage.app",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID",
-      measurementId: "G-XXXXXXXXXX"
-    };
-
-    // --- Init Firebase ---
-    const app = initializeApp(firebaseConfig);                     // Initialize Firebase app
-    analyticsSupported().then(s => { if (s) getAnalytics(app); }); // Optional Analytics
-    const auth = getAuth(app);                                     // Initialize Auth
-    const provider = new GoogleAuthProvider();                     // Google provider
-    const db = getFirestore(app);                                  // Firestore
-
-    // ----- DOM refs -----
-    const el = {
-      signBtn: document.getElementById('sign-btn'),
-      announcements: document.getElementById('announcements-list'),
-      committees: document.getElementById('committees-list'),
-      events: document.getElementById('events-list'),
-      eventForm: document.getElementById('event-form'),
-      eventSelect: document.getElementById('event-select'),
-      name: document.getElementById('rf-name'),
-      email: document.getElementById('rf-email'),
-      phone: document.getElementById('rf-phone'),
-      cid: document.getElementById('rf-cid'),
-      agree: document.getElementById('rf-agree'),
-      regs: document.getElementById('registrations'),
-      members: document.getElementById('members-grid'),
-      deps: document.getElementById('deps-grid'),
-      seedBtn: document.getElementById('seed-btn'),
-      heroTitle: document.getElementById('hero-title'),
-      status: document.getElementById('status'),
-    };
-
-    function showError(msg) {
-      el.status.textContent = msg;
-      console.error('[CAT] ', msg);
-    }
-
-    // ----- Auth state -----
-    let currentUser = null;
-    onAuthStateChanged(auth, async (u) => {
-      currentUser = u || null;
-      el.signBtn.textContent = u ? "Sign out" : "Sign in with Google";
-      if (u) {
-        try {
-          await setDoc(doc(db,'users',u.uid), {
-            uid:u.uid, name:u.displayName, email:u.email, photoUrl:u.photoURL, createdAt: serverTimestamp()
-          }, { merge:true });
-
-          // Live registrations
-          const rq = query(collection(db,'registrations'), where('userId','==', u.uid));
-          onSnapshot(rq, snap => {
-            el.regs.innerHTML = '';
-            snap.forEach(d => {
-              const r = d.data();
-              const row = document.createElement('div');
-              row.className = 'glass card';
-              row.innerHTML = `
-                <strong>Event:</strong> ${r.eventId} • <strong>Status:</strong> ${r.status || 'active'}
-                ${r.status !== 'cancelled' ? '<button class="btn" data-id="'+r.id+'">Cancel</button>' : ''}
-              `;
-              const btn = row.querySelector('button');
-              if (btn) btn.addEventListener('click', async () => {
-                try { await updateDoc(doc(db,'registrations', r.id), { status:'cancelled' }); }
-                catch (err) { showError('Unable to cancel: ' + err?.message); }
-              });
-              el.regs.appendChild(row);
-            });
-          });
-        } catch (err) {
-          showError('User profile update failed: ' + (err?.message || err));
-        }
-      }
-    });
-
-    // ----- Sign In/Out -----
-    el.signBtn.addEventListener('click', async () => {
-      try {
-        if (currentUser) await signOut(auth);
-        else await signInWithPopup(auth, provider);
-      } catch (err) {
-        // Common causes: domain not added to Authorized domains; Google provider not enabled.
-        showError('Sign-in error: ' + (err?.message || err));
-      }
-    });
-
-    // ----- Anime.js reveals -----
-    function reveal(selector, delay=0) {
-      const nodes = document.querySelectorAll(selector);
-      if (!window.anime) return; // fail-safe if CDN fails
-      window.anime({
-        targets: nodes,
-        opacity: [0,1],
-        translateY: [18,0],
-        duration: 900,
-        delay: window.anime.stagger(60, { start: delay }),
-        easing: 'easeOutQuad'
-      });
-    }
-
-    // ----- Load public collections -----
-    function loadAnnouncements() {
-      try {
-        const q = query(collection(db,'announcements'), orderBy('date','desc'));
-        onSnapshot(q, snap => {
-          el.announcements.innerHTML = '';
-          if (snap.empty) { el.announcements.innerHTML = `<p class="muted">No announcements yet.</p>`; return; }
-          snap.forEach(d => {
-            const a = d.data();
-            const card = document.createElement('div');
-            card.className = 'glass card reveal';
-            const when = a.date?.seconds ? new Date(a.date.seconds*1000).toLocaleString() : '';
-            card.innerHTML = `<strong>${a.title}</strong><div class="muted">${when}</div><p>${a.description||''}</p>`;
-            el.announcements.appendChild(card);
-          });
-          reveal('#announcements-list .reveal', 200);
-        });
-      } catch (err) { showError('Announcements load failed: ' + err?.message); }
-    }
-
-    function loadCommittees() {
-      try {
-        onSnapshot(collection(db,'committees'), snap => {
-          el.committees.innerHTML = '';
-          if (snap.empty) { el.committees.innerHTML = `<p class="muted">No committees yet.</p>`; return; }
-          snap.forEach(d => {
-            const c = d.data();
-            const card = document.createElement('div');
-            card.className = 'glass card reveal';
-            card.innerHTML = `<h3>${c.name}</h3><p class="muted">${c.description||''}</p>
-              <button class="btn" data-id="${d.id}">Join</button>`;
-            card.querySelector('button')?.addEventListener('click', async () => {
-              try {
-                if (!currentUser) { alert('Sign in to apply'); return; }
-                const id = `${currentUser.uid}_${d.id}`;
-                await setDoc(doc(db,'committeeApplications', id), {
-                  id, userId: currentUser.uid, committeeId: d.id, status:'pending', createdAt: serverTimestamp()
-                });
-                alert('Applied! Track it in Profile.');
-              } catch (err) { showError('Apply failed: ' + err?.message); }
-            });
-            el.committees.appendChild(card);
-          });
-          reveal('#committees-list .reveal', 200);
-        });
-      } catch (err) { showError('Committees load failed: ' + err?.message); }
-    }
-
-    function loadEvents() {
-      try {
-        const q = query(collection(db,'events'), orderBy('datetime','asc'));
-        onSnapshot(q, snap => {
-          el.events.innerHTML = '';
-          el.eventSelect.innerHTML = '<option value="">Select an event…</option>';
-          if (snap.empty) { el.events.innerHTML = `<p class="muted">No events yet.</p>`; return; }
-          snap.forEach(d => {
-            const e = d.data();
-            const card = document.createElement('div');
-            card.className = 'glass card reveal';
-            const when = e.datetime?.seconds ? new Date(e.datetime.seconds*1000).toLocaleString() : (e.datetime||'');
-            card.innerHTML = `<h3>${e.title}</h3><p>${e.description||''}</p><div class="muted">${when} • ${e.venue||''}</div>`;
-            el.events.appendChild(card);
-            const opt = document.createElement('option'); opt.value = d.id; opt.textContent = e.title;
-            el.eventSelect.appendChild(opt);
-          });
-          reveal('#events-list .reveal', 200);
-        });
-      } catch (err) { showError('Events load failed: ' + err?.message); }
-    }
-
-    async function loadMembers() {
-      try {
-        const q = query(collection(db,'members'), orderBy('name'), limit(40));
-        const snap = await getDocs(q);
-        el.members.innerHTML = '';
-        snap.forEach(d => {
-          const m = d.data();
-          const card = document.createElement('div');
-          card.className = 'glass card reveal';
-          card.innerHTML = `
-            <div style="display:flex; gap:12px; align-items:center">
-              <div style="width:48px;height:48px;border-radius:12px;background:rgba(255,255,255,.1);display:grid;place-items:center">
-                ${(m.name||'?').slice(0,1)}
-              </div>
-              <div>
-                <strong>${m.name||'Member'}</strong>
-                <div class="muted">${m.committee||''} • ${m.role||''}</div>
-              </div>
-            </div>`;
-          el.members.appendChild(card);
-        });
-        reveal('#members-grid .reveal', 200);
-      } catch (err) { showError('Members load failed: ' + err?.message); }
-    }
-
-    function loadDepartments() {
-      try {
-        onSnapshot(collection(db,'departments'), snap => {
-          el.deps.innerHTML = '';
-          if (snap.empty) { el.deps.innerHTML = `<p class="muted">No departments yet.</p>`; return; }
-          snap.forEach(d => {
-            const dep = d.data();
-            const card = document.createElement('div');
-            card.className = 'glass card reveal';
-            card.innerHTML = `<h3>${dep.name}</h3><p>${dep.description||''}</p>`;
-            el.deps.appendChild(card);
-          });
-          reveal('#deps-grid .reveal', 200);
-        });
-      } catch (err) { showError('Departments load failed: ' + err?.message); }
-    }
-
-    // ----- Event registration -----
-    el.eventForm.addEventListener('submit', async (evt) => {
-      evt.preventDefault();
-      try {
-        if (!currentUser) { alert('Sign in to register'); return; }
-        const eventId = el.eventSelect.value;
-        const name = el.name.value.trim();
-        const email = el.email.value.trim();
-        const phone = el.phone.value.trim();
-        const cid = el.cid.value.trim();
-        const agree = el.agree.checked;
-        if (!eventId || !name || !email || !phone || !cid || !agree) { alert('Fill all fields and agree'); return; }
-        const regId = `${currentUser.uid}_${eventId}`;
-        await setDoc(doc(db,'registrations', regId), {
-          id: regId, userId: currentUser.uid, eventId, name, email, phone, collegeId: cid,
-          paymentStatus: 'n/a', createdAt: serverTimestamp()
-        });
-        alert('Registered! Manage it in Profile.');
-        el.eventForm.reset();
-      } catch (err) { showError('Registration failed: ' + err?.message); }
-    });
-
-    // ----- Seed sample content -----
-    el.seedBtn.addEventListener('click', async () => {
-      try {
-        const committees = [
-          { id:'events', name:'Events', description:'Plan & run cultural events' },
-          { id:'dmc', name:'DMC', description:'Design & Media Cell: creatives & social' },
-          { id:'pr', name:'PR', description:'Public Relations: outreach & buzz' },
-          { id:'sponsorship', name:'Sponsorship', description:'Partners & sponsors' },
-          { id:'hospitality', name:'Hospitality', description:'Guest care & operations' },
-          { id:'deco', name:'Deco', description:'Decor & ambience' },
-          { id:'disciplinary', name:'Disciplinary', description:'Code of conduct & crowd mgmt' },
-          { id:'accounts', name:'Accounts', description:'Budgeting & finance' },
-        ];
-        const departments = [
-          { id:'cse', name:'Computer Science & Engineering', description:'Core CS, systems & software.' },
-          { id:'ise', name:'Information Science & Engineering', description:'Data, systems & applications.' },
-          { id:'ece', name:'Electronics & Communication Engineering', description:'Circuits, embedded & comms.' },
-          { id:'eee', name:'Electrical & Electronics Engineering', description:'Power systems & electronics.' },
-          { id:'me', name:'Mechanical Engineering', description:'Design, thermals & manufacturing.' },
-          { id:'civil', name:'Civil Engineering', description:'Structures & infrastructure.' },
-          { id:'aids', name:'Artificial Intelligence & Data Science', description:'ML, AI & data engineering.' },
-        ];
-        for (const c of committees)  await setDoc(doc(db,'committees', c.id), c, { merge:true });
-        for (const d of departments) await setDoc(doc(db,'departments', d.id), d, { merge:true });
-        await setDoc(doc(db,'events','rangotsav'), {
-          title:'Rangotsav', description:'Annual cultural fest', venue:'RNSIT Auditorium',
-          datetime: new Date().toISOString()
-        }, { merge:true });
-        await setDoc(doc(db,'announcements','welcome'), {
-          title:'Welcome to CAT!', description:'Explore committees & events', date: new Date()
-        }, { merge:true });
-        alert('Sample data seeded!');
-      } catch (err) { showError('Seeding failed: ' + err?.message); }
-    });
-
-    // ----- Boot -----
-    window.addEventListener('DOMContentLoaded', () => {
-      loadAnnouncements(); loadCommittees(); loadEvents(); loadMembers(); loadDepartments();
-      reveal('#hero-title', 0);
-    });
-
-    // ----- Optional: tiny Three.js hero bubbles -----
-    window.addEventListener('load', () => {
-      const canvas = document.getElementById('hero3d');
-      if (!window.THREE || !canvas) return;
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(60, canvas.clientWidth/canvas.clientHeight, 0.1, 100);
-      camera.position.z = 6;
-      const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true, canvas });
-      renderer.setSize(canvas.clientWidth, canvas.clientHeight);
-      const light = new THREE.PointLight(0xffffff, 1.2); light.position.set(3,3,5); scene.add(light);
-      const mat = new THREE.MeshPhysicalMaterial({ color:0xffffff, transparent:true, opacity:.35, roughness:.1, transmission:.95, thickness:.5, clearcoat:1, clearcoatRoughness:.05 });
-      const spheres = [];
-      for (let i=0;i<16;i++) {
-        const g = new THREE.SphereGeometry(Math.random()*0.3+0.15, 32, 32);
-        const m = new THREE.Mesh(g, mat);
-        m.position.set((Math.random()-0.5)*6, (Math.random()-0.5)*3, (Math.random()-0.5)*3);
-        spheres.push(m); scene.add(m);
-      }
-      const clock = new THREE.Clock();
-      function animate() {
-        const t = clock.getElapsedTime();
-        spheres.forEach((s,i)=>{ s.position.y += Math.sin(t+i)*0.002; s.rotation.y += 0.004; });
-        renderer.render(scene, camera);
-        requestAnimationFrame(animate);
-      }
-      animate();
-      window.addEventListener('resize', () => {
-        camera.aspect = canvas.clientWidth/canvas.clientHeight; camera.updateProjectionMatrix();
-        renderer.setSize(canvas.clientWidth, canvas.clientHeight);
-      });
-    });
-  </script>
 </head>
 <body>
-  <div class="aura"></div>
+
+  <!-- Top doodle loader -->
+  <div id="doodleLoader" aria-hidden="true">
+    <svg viewBox="0 0 1200 10" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="g" x1="0" x2="1">
+          <stop offset="0%" stop-color="#64d2ff"/><stop offset="50%" stop-color="#ff5bd4"/><stop offset="100%" stop-color="#55ffd7"/>
+        </linearGradient>
+      </defs>
+      <path d="M0 5 Q 120 0 240 5 T 480 5 T 720 5 T 960 5 T 1200 5"></path>
+    </svg>
+  </div>
 
   <!-- Nav -->
-  <header class="nav glass">
-    <div class="brand">CAT • RNSIT</div>
-    <nav>
-      <a href="#committees">Committees</a>
-      <a href="#events">Events</a>
-      <a href="#members">Members</a>
-      <a href="#profile">Profile</a>
-      <a href="#departments">Departments</a>
-    </nav>
-    <button id="sign-btn" class="btn">Sign in with Google</button>
-  </header>
-
-  <main class="container">
-    <!-- Hero -->
-    <section class="glass card">
-      <div class="hero">
-        <div>
-          <h1 id="hero-title" class="hero-title reveal">CAT • Cultural Activity Team</h1>
-          <p class="muted">Professional + Energetic • Liquid glass + cultural vibes ✨</p>
-          <div id="status"></div>
-          <button id="seed-btn" class="btn" style="margin-top:10px;">Seed sample data</button>
+  <nav class="nav">
+    <div class="nav-inner container">
+      <div class="brand">
+        <div class="brand-logo">
+          <img src="https://res.cloudinary.com/dx1wxv6ck/image/upload/v1766845182/544806874_18340747831160890_4239570139746452250_n_ob2z58.jpg" alt="CAT Logo">
         </div>
-        <div style="position:relative">
-          <canvas id="hero3d" style="width:100%;height:260px;display:block"></canvas>
+        CAT <span>RNSIT</span>
+      </div>
+
+      <div class="nav-search">
+        <input id="navSearchInput" type="search" placeholder="Search RNSIT/CAT on Google">
+        <button class="btn btn-outline" id="navSearchBtn"><i class="fa-solid fa-magnifying-glass"></i></button>
+      </div>
+
+      <div class="actions">
+        <!-- User badge (photo + name) acts as menu trigger -->
+        <span id="userBadge">
+          <img id="userBadgePhoto" src="" alt="User"/>
+          <span id="userBadgeName"></span>
+        </span>
+        <button id="signInBtn" class="btn btn-primary"><i class="fa-brands fa-google"></i> Sign in with Google</button>
+
+        <!-- Dropdown menu: Profile + Sign out -->
+        <div id="userMenu" class="user-menu">
+          <div class="small" id="userMenuStatus">Signed in</div>
+          <button id="openProfileMenuBtn"><i class="fa-solid fa-user"></i> &nbsp;Profile</button>
+          <button id="menuSignOutBtn"><i class="fa-solid fa-right-from-bracket"></i> &nbsp;Sign out</button>
         </div>
       </div>
-    </section>
+    </div>
+  </nav>
 
-    <!-- Announcements -->
-    <section class="glass card" style="margin-top:16px">
-      <h2>Announcements</h2>
-      <div id="announcements-list" class="grid"></div>
-    </section>
+  <!-- Hero 3D -->
+  <section class="hero container" id="hero">
+    <div class="hero-3d" id="hero3d">
+      <div class="layer" id="layer">
+        <div class="blob pink" style="top:20px;left:20px"></div>
+        <div class="blob blue" style="top:40px;right:30px"></div>
+        <div class="blob" style="bottom:10px;left:60px"></div>
+      </div>
+    </div>
+    <div class="hero-card">
+      <h1 id="heroTitle">Cultural Activity Team</h1>
+      <p class="sub">Register for events, explore committees, meet the crew, and get campus updates — built for mobile.</p>
+      <div class="cta">
+        <button class="btn btn-primary" onclick="document.getElementById('events').scrollIntoView({behavior:'smooth'})"><i class="fa-solid fa-ticket"></i> Events</button>
+        <button class="btn btn-outline" onclick="document.getElementById('committees').scrollIntoView({behavior:'smooth'})"><i class="fa-solid fa-layer-group"></i> Committees</button>
+        <button class="btn btn-outline" onclick="document.getElementById('members').scrollIntoView({behavior:'smooth'})"><i class="fa-solid fa-people-group"></i> Crew</button>
+        <button class="btn btn-outline" onclick="document.getElementById('faq').scrollIntoView({behavior:'smooth'})"><i class="fa-solid fa-circle-question"></i> FAQ</button>
+      </div>
+    </div>
+  </section>
 
-    <!-- Committees -->
-    <section id="committees" class="glass card" style="margin-top:16px">
-      <h2>Committees</h2>
-      <div id="committees-list" class="grid"></div>
-    </section>
+  <!-- Events -->
+  <section class="container" id="events">
+    <h2 class="section-title">Active & Upcoming Events</h2>
+    <p class="section-sub">Quick registration with USN check and department picker.</p>
+    <div class="grid" id="eventsGrid"></div>
 
-    <!-- Events + Registration -->
-    <section id="events" class="glass card" style="margin-top:16px">
-      <h2>Upcoming Events</h2>
-      <div id="events-list" class="grid"></div>
+    <!-- Manage / Cancel -->
+    <div class="hero-card" style="margin-top:14px">
+      <h3 style="margin:0 0 6px">Manage / Cancel</h3>
+      <p class="terms">Enter a valid email to load registrations, then cancel with a reason.</p>
+      <div class="form-grid">
+        <div class="form-row"><label for="manageEmail">Your email</label><input id="manageEmail" type="email" placeholder="name@rnsit.edu.in"/></div>
+        <div class="form-row"><label>&nbsp;</label><button class="btn btn-outline" onclick="loadMyRegistrations()"><i class="fa-solid fa-list"></i> Load</button></div>
+      </div>
+      <div id="myRegs" class="grid" style="grid-template-columns:1fr; margin-top:10px"></div>
+    </div>
+  </section>
 
-      <div class="glass card" style="margin-top:16px">
-        <h3>Register for an Event</h3>
-        <form id="event-form">
-          <div style="display:grid; gap:12px; grid-template-columns: 1fr 1fr;">
-            <div>
-              <label>Event</label>
-              <select id="event-select" required></select>
-            </div>
-            <div>
-              <label>Name</label>
-              <input id="rf-name" type="text" required/>
-            </div>
-            <div>
-              <label>Email</label>
-              <input id="rf-email" type="email" required/>
-            </div>
-            <div>
-              <label>Phone</label>
-              <input id="rf-phone" type="tel" required/>
-            </div>
-            <div>
-              <label>College ID</label>
-              <input id="rf-cid" type="text" required/>
-            </div>
-          </div>
+  <!-- Committees — fixed grid -->
+  <section class="container" id="committees">
+    <h2 class="section-title">CAT Committees</h2>
+    <div class="committees" id="committeesGrid"></div>
+  </section>
+
+  <!-- Members — dropdown filter ONLY here -->
+  <section class="container" id="members">
+    <h2 class="section-title">CAT Crew • The Backbone</h2>
+    <div class="crew-filter">
+      <label for="crewFilter" class="terms">Filter</label>
+      <select id="crewFilter">
+        <option value="all">All</option>
+        <option value="lead">Leads</option>
+        <option value="core">Core</option>
+      </select>
+    </div>
+    <div class="crew" id="membersGrid"></div>
+  </section>
+
+  <!-- Contact -->
+  <section class="container" id="contact">
+    <h2 class="section-title">Contact CAT</h2>
+    <div class="hero-card">
+      <div class="form-grid">
+        <div class="form-row"><label for="cName">Name</label><input id="cName" type="text" placeholder="Your name"/></div>
+        <div class="form-row"><label for="cEmail">Email</label><input id="cEmail" type="email" placeholder="you@rnsit.edu.in"/></div>
+        <div class="form-row"><label for="cTopic">Topic</label>
+          <select id="cTopic"><option>General query</option><option>Event registration issue</option><option>Volunteer / Join</option><option>Collaboration</option></select>
+        </div>
+        <div class="form-row" style="grid-column:1/-1"><label for="cMsg">Message</label><textarea id="cMsg" placeholder="Type your message"></textarea></div>
+      </div>
+      <div class="actions" style="margin-top:10px">
+        <button class="btn btn-primary" onclick="submitContact()"><i class="fa-solid fa-share"></i> Send</button>
+        <span id="cStatus" class="terms"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="container" id="faq">
+    <h2 class="section-title">FAQ</h2>
+    <div class="faq">
+      <details>
+        <summary>How do I register for an event?</summary>
+        <p>Go to **Events** → tap **Register** on your event. Enter your details, ensure USN like **1RN24ME015**, and select your department from the drawer.</p>
+      </details>
+      <details>
+        <summary>How do I cancel my registration?</summary>
+        <p>Use **Manage/Cancel** → enter your email → choose a reason → tap **Cancel**. You’ll see the change immediately.</p>
+      </details>
+      <details>
+        <summary>How do I join a committee?</summary>
+        <p>Open **Committees** → tap a card to read responsibilities and tools. Recruitment opens during drives — watch this page and socials.</p>
+      </details>
+      <details>
+        <summary>How do I get updates?</summary>
+        <p>Sign in with Google; after sign‑in, we ask if you want updates. If you agree, your email gets saved locally for newsletters.</p>
+      </details>
+    </div>
+  </section>
+
+  <!-- Register modal -->
+  <div class="modal" id="registerModal">
+    <div class="modal-card" id="registerCard">
+      <div class="modal-header">
+        <div class="modal-title"><i class="fa-solid fa-ticket"></i> Event Registration</div>
+        <div class="close" onclick="closeModal('registerModal')"><i class="fa-solid fa-xmark"></i></div>
+      </div>
+      <div id="regEventName" class="terms" style="margin-bottom:6px"></div>
+      <div class="form-grid">
+        <div class="form-row"><label for="regName">Full name</label><input id="regName" type="text" placeholder="Your name"></div>
+        <div class="form-row"><label for="regEmail">Email</label><input id="regEmail" type="email" placeholder="you@rnsit.edu.in"></div>
+        <div class="form-row"><label for="regUSN">USN</label><input id="regUSN" type="text" placeholder="e.g., 1RN24ME015"><small id="usnError" class="error"></small></div>
+        <div class="form-row"><label for="regDept">Department</label><input id="regDept" type="text" readonly placeholder="Choose department" onclick="openDeptDrawer()"><small id="deptError" class="error"></small></div>
+        <div class="form-row" style="grid-column:1/-1"><label for="regNotes">Notes</label><textarea id="regNotes" placeholder="Any special requirements"></textarea></div>
+      </div>
+      <div class="actions" style="margin-top:10px">
+        <button class="btn btn-primary" onclick="submitRegistration()"><i class="fa-solid fa-check"></i> Confirm</button>
+        <span id="regStatus" class="terms"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dept drawer -->
+  <div class="drawer" id="deptDrawer">
+    <h4>Select Department</h4>
+    <div class="dept-grid" id="deptGrid"></div>
+    <div style="margin-top:10px;text-align:right">
+      <button class="btn btn-outline" onclick="closeDeptDrawer()">Close</button>
+    </div>
+  </div>
+
+  <!-- Committee modal -->
+  <div class="modal" id="committeeModal">
+    <div class="modal-card" id="committeeCard">
+      <div class="modal-header">
+        <div class="modal-title" id="committeeTitle"><i class="fa-solid fa-layer-group"></i> Committee</div>
+        <div class="close" onclick="closeModal('committeeModal')"><i class="fa-solid fa-xmark"></i></div>
+      </div>
+      <div id="committeeBody" style="max-height:55vh;overflow:auto"></div>
+    </div>
+  </div>
+
+  <!-- Profile modal (enhanced features) -->
+  <div class="modal" id="profileModal">
+    <div class="modal-card" id="profileCard">
+      <div class="modal-header">
+        <div class="modal-title"><i class="fa-solid fa-user"></i> Your Profile</div>
+        <div class="close" onclick="closeModal('profileModal')"><i class="fa-solid fa-xmark"></i></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-row">
+          <label>Photo</label>
+          <img id="profilePhoto" alt="Profile photo" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:1px solid var(--border)">
+        </div>
+        <div class="form-row">
+          <label for="profileName">Display name</label>
+          <input id="profileName" type="text" placeholder="Your name">
+        </div>
+        <div class="form-row">
+          <label for="profilePhotoURL">Photo URL</label>
+          <input id="profilePhotoURL" type="url" placeholder="https://...">
+        </div>
+        <div class="form-row">
+          <label>Email</label>
+          <input id="profileEmail" type="email" readonly>
+        </div>
+        <div class="form-row">
+          <label for="profileYear">Year</label>
+          <select id="profileYear">
+            <option value="">Select</option>
+            <option>1st Year</option><option>2nd Year</option><option>3rd Year</option><option>4th Year</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label for="profileDept">Department</label>
+          <select id="profileDept">
+            <option value="">Select</option>
+            <option>CSE</option><option>ISE</option><option>ECE</option><option>EEE</option><option>ME</option><option>BT</option>
+            <option>AIML</option><option>DS</option><option>CIV</option><option>ET</option><option>MBA</option><option>MCA</option>
+          </select>
+        </div>
+        <div class="form-row" style="grid-column:1/-1">
+          <label for="profileBio">Bio</label>
+          <textarea id="profileBio" placeholder="Tell us about yourself"></textarea>
+        </div>
+      </div>
+      <div class="actions" style="margin-top:10px">
+        <button class="btn btn-primary" id="saveProfileBtn"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+        <button class="btn btn-outline" id="signOutProfileBtn"><i class="fa-solid fa-right-from-bracket"></i> Sign out</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat -->
+  <button class="chat-launch" id="chatOpen"><i class="fa-solid fa-comment"></i> Ask CAT</button>
+  <div class="chat" id="chatBox">
+    <div class="chat-header"><strong><i class="fa-solid fa-robot"></i> CAT Helpdesk</strong><span class="close" onclick="toggleChat(false)"><i class="fa-solid fa-xmark"></i></span></div>
+    <div class="chat-body" id="chatBody"><div class="bubble">Hi! Type anything—I'll fetch web results inline.</div></div>
+    <div class="chat-form"><input id="chatInput" type="text" placeholder="Type your question..."/><button class="btn btn-primary btn-small" onclick="sendChat()"><i class="fa-solid fa-paper-plane"></i></button></div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="container">
+    <div class="footer-inner">
+      <div>© <span id="year"></span> CAT • RNSIT</div>
+      <div>Made with <i class="fa-solid fa-heart" style="color:#ff5bd4"></i> by CAT</div>
+    </div>
+  </footer>
+
+  <!-- App JS -->
+  <script>
+    /* ===== Data ===== */
+    const EVENTS = [
+      { id:"beats25", name:"Campus Beats ’25", when:"Jan 28, 2025", where:"Main Stage", type:"Fest", desc:"Music & dance showcase with teams and solo slots.", tags:["Music","Dance","Show"] },
+      { id:"dramix",  name:"Dramix – Theatre Night", when:"Feb 14, 2025", where:"Auditorium", type:"Show", desc:"Drama, comedy, improv — stage & crew.", tags:["Theatre","Improv"] },
+      { id:"artjam",  name:"ArtJam – Pop Art Workshop", when:"Feb 28, 2025", where:"Courtyard", type:"Workshop", desc:"Campus artists leading hands-on sessions.", tags:["Art","Workshop"] },
+      { id:"battle",  name:"Beat Battle – DJ vs DJ", when:"Mar 8, 2025", where:"Open Arena", type:"Battle", desc:"Live crowd vote. Limited slots.", tags:["DJ","Battle"] },
+    ];
+    const COMMITTEES = [
+      { id:"events",        name:"Events",        icon:"calendar-check",        intro:"Plans & runs shows, fests, workshops end-to-end.", focus:["Program curation","Stage flow & emcee","Registrations & rosters","Run sheets & timing"], tools:["Sheets/Forms","Cue lists","Stage timers"] },
+      { id:"dmc",           name:"DMC (Design & Media)", icon:"camera",         intro:"Creatives, photo/video coverage, content.", focus:["Branding & posters","Photography & Reels","After-movies","Social content"], tools:["Canva/Figma","DSLR/Gimbal","Premiere/CapCut"] },
+      { id:"decor",         name:"Decor",         icon:"wand-magic-sparkles",   intro:"Stage design, props, installations, ambience.", focus:["Stage layout","Props & signage","Art walls","Thematic sets"], tools:["Craft & paint","Foamboard/LEDs","Logistics support"] },
+      { id:"sponsorship",   name:"Sponsorship",   icon:"handshake-angle",       intro:"Partners, budget & sponsor deliverables.", focus:["Prospecting","Pitches & decks","Negotiations","Benefits tracking"], tools:["CRM sheets","Email templates","MoUs"] },
+      { id:"jukebox",       name:"Jukebox",       icon:"music",                 intro:"Music programming, sound, playlists & vibes.", focus:["Setlists","Sound checks","DJ coordination","Live mixes"], tools:["DAWs","Controllers","Mixers & mics"] },
+      { id:"disciplinary",  name:"Disciplinary",  icon:"shield-halved",         intro:"Codes of conduct, safety & crowd control.", focus:["Entry/ID checks","Backstage rules","Emergency response","Lost & found"], tools:["Briefings","Security tie-ups","Incident logs"] },
+      { id:"hospitality",   name:"Hospitality",   icon:"people-carry-box",      intro:"Guests, artists, logistics & care.", focus:["Invites","Green rooms","Travel & stay","Refreshments"], tools:["Itineraries","Checklists","Vendor coordination"] },
+      { id:"pr",            name:"PR",            icon:"bullhorn",              intro:"Promotion, outreach & campus buzz.", focus:["Announcements","Press/Newsletters","Influencer collabs","Booths & stalls"], tools:["Copy docs","Mailers","Social boosts"] }
+    ];
+    const MEMBERS = [
+      {name:"Ananya", role:"President", tier:"lead"},
+      {name:"Rahul", role:"Vice President", tier:"lead"},
+      {name:"Meera", role:"Events Lead", tier:"lead"},
+      {name:"Arjun", role:"Stage Manager", tier:"core"},
+      {name:"Riya", role:"Design Lead", tier:"lead"},
+      {name:"Neha", role:"PR & Outreach", tier:"core"},
+      {name:"Kunal", role:"Logistics", tier:"core"},
+      {name:"Varun", role:"Music Coord", tier:"core"},
+      {name:"Sneha", role:"Dance Coord", tier:"core"},
+    ];
+    const DEFAULT_AVATAR = "https://res.cloudinary.com/dx1wxv6ck/image/upload/v1766859521/user-account-icon-for-your-desig_kunqf7.png";
+    const DEPTS = ["CSE","ISE","ECE","EEE","ME","BT","AIML","DS","CIV","ET","MBA","MCA"];
+
+    /* ===== Year & loader ===== */
+    document.getElementById("year").textContent = new Date().getFullYear();
+    window.addEventListener("load", ()=>{
+      const dl = document.getElementById("doodleLoader"); dl.style.display="block";
+      setTimeout(()=> dl.style.display="none", 900);
+    });
+
+    /* ===== Navbar search → Google ===== */
+    document.getElementById('navSearchBtn').addEventListener('click', navSearchSubmit);
+    document.getElementById('navSearchInput').addEventListener('keydown', (e)=>{ if(e.key==='Enter') navSearchSubmit(); });
+    function navSearchSubmit(){
+      const q = document.getElementById('navSearchInput').value.trim();
+      if(!q) return;
+      const url = "https://www.google.com/search?q=" + encodeURIComponent(q + " RNSIT CAT");
+      window.open(url, "_blank");
+    }
+
+    /* ===== Hero 3D tilt + parallax ===== */
+    const hero3d = document.getElementById('hero3d');
+    const layer = document.getElementById('layer');
+    hero3d.addEventListener('mousemove', (e)=>{
+      const r = hero3d.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5;
+      const y = (e.clientY - r.top) / r.height - 0.5;
+      layer.style.transform = `rotateY(${x*10}deg) rotateX(${y*-10}deg) translateZ(20px)`;
+    });
+    hero3d.addEventListener('mouseleave', ()=> layer.style.transform = 'rotateY(0deg) rotateX(0deg) translateZ(0)');
+
+    /* Animate blobs */
+    anime({targets:'.blob.pink', translateX:[0,20,-10,0], translateY:[0,-12,8,0], duration:3000, easing:'easeInOutSine', loop:true});
+    anime({targets:'.blob.blue', translateX:[0,-16,10,0], translateY:[0,10,-12,0], duration:3200, easing:'easeInOutSine', loop:true});
+
+    /* ===== Hero letters ===== */
+    (function heroLetters(){
+      const h=document.getElementById('heroTitle');
+      h.innerHTML = h.textContent.split('').map(ch=>`<span class="letter">${ch}</span>`).join('');
+      anime.timeline({loop:false}).add({
+        targets:'#heroTitle .letter',
+        translateY:[40,0],opacity:[0,1],easing:'easeOutExpo',duration:600,delay:(el,i)=>14*i
+      });
+    })();
+
+    /* ===== Button ripple ===== */
+    document.querySelectorAll('.btn').forEach(btn=>{
+      btn.addEventListener('click', (ev)=>{
+        const ripple = document.createElement('span');
+        ripple.style.position = 'absolute';
+        ripple.style.left = `${ev.offsetX}px`;
+        ripple.style.top = `${ev.offsetY}px`;
+        ripple.style.width = ripple.style.height = '0px';
+        ripple.style.borderRadius = '50%';
+        ripple.style.background = 'rgba(255,255,255,0.25)';
+        ripple.style.transform = 'translate(-50%, -50%)';
+        btn.appendChild(ripple);
+        anime({targets:ripple,width:180,height:180,opacity:[0.5,0],easing:'easeOutQuad',duration:600,complete:()=>ripple.remove()});
+      });
+    });
+
+    /* ===== Events grid ===== */
+    const grid=document.getElementById("eventsGrid");
+    function pill(tags){ return tags.map(t=>`<span class="badge">${t}</span>`).join(" "); }
+    function renderEvents(){
+      grid.innerHTML = EVENTS.map(ev=>`
+        <div class="card">
+          <h3>${ev.name}</h3>
+          <p>${ev.desc}</p>
+          <div class="meta"><span><i class="fa-solid fa-calendar"></i> ${ev.when}</span> • <span><i class="fa-solid fa-location-dot"></i> ${ev.where}</span></div>
+          <div class="hero-badges">${pill(ev.tags)}</div>
           <div style="margin-top:8px">
-            <input id="rf-agree" type="checkbox" required/> I agree to event rules & terms.
+            <button class="btn btn-primary" onclick="openRegister('${ev.id}')"><i class="fa-solid fa-ticket"></i> Register</button>
           </div>
-          <button class="btn" style="margin-top:12px">Submit Registration</button>
-        </form>
-      </div>
-    </section>
+        </div>
+      `).join("");
+      anime({targets:'#eventsGrid .card',opacity:[0,1],translateY:[18,0],duration:450,easing:'easeOutQuad',delay:(el,i)=>40*i});
+    }
+    renderEvents();
 
-    <!-- Members -->
-    <section id="members" class="glass card" style="margin-top:16px">
-      <h2>Members Directory</h2>
-      <div id="members-grid" class="grid"></div>
-    </section>
+    /* ===== Validations ===== */
+    function validateEmailStrict(email){ return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(email); }
+    function validateUSN(usn){ const u=usn.toUpperCase().replace(/\s+/g,''); return /^[1-9]RN\d{2}[A-Z]{2}\d{3}$/.test(u); }
 
-    <!-- Profile: Manage Registrations -->
-    <section id="profile" class="glass card" style="margin-top:16px">
-      <h2>Manage Registrations</h2>
-      <div id="registrations" style="display:grid; gap:8px"></div>
-      <p class="muted">Sign in to view/manage your registrations across devices.</p>
-    </section>
+    /* ===== Registration + Department drawer ===== */
+    let currentEventId=null;
+    function openRegister(id){
+      currentEventId=id;
+      const ev=EVENTS.find(e=>e.id===id);
+      document.getElementById("regEventName").innerHTML = `<strong>Event:</strong> ${ev.name} • <em>${ev.when} @ ${ev.where}</em>`;
+      openModal('registerModal','#registerCard');
+      document.getElementById("regStatus").textContent=""; document.getElementById("usnError").textContent=""; document.getElementById("deptError").textContent="";
+    }
+    const deptDrawer=document.getElementById("deptDrawer");
+    const deptGrid=document.getElementById("deptGrid");
+    deptGrid.innerHTML = DEPTS.map(d=>`<div class="dept-chip" onclick="chooseDept('${d}')">${d}</div>`).join("");
+    function openDeptDrawer(){ deptDrawer.classList.add("open"); }
+    function closeDeptDrawer(){ deptDrawer.classList.remove("open"); }
+    function chooseDept(d){ document.getElementById("regDept").value=d; closeDeptDrawer(); }
+    function submitRegistration(){
+      const name=document.getElementById("regName").value.trim();
+      const email=document.getElementById("regEmail").value.trim();
+      const usn=document.getElementById("regUSN").value.trim();
+      const dept=document.getElementById("regDept").value.trim();
+      const notes=document.getElementById("regNotes").value.trim();
+      const status=document.getElementById("regStatus");
+      document.getElementById("usnError").textContent=""; document.getElementById("deptError").textContent="";
+      let ok=true;
+      if(!name) ok=false;
+      if(!validateEmailStrict(email)) ok=false;
+      if(!validateUSN(usn)) { ok=false; document.getElementById("usnError").textContent="USN must be like 1RN24ME015"; }
+      if(!dept) { ok=false; document.getElementById("deptError").textContent="Select a department"; }
+      if(!ok){ status.textContent="Please fill all required fields correctly."; return; }
+      const ev=EVENTS.find(e=>e.id===currentEventId);
+      const entry={id:crypto.randomUUID(),eventId:ev.id,eventName:ev.name,name,email,usn:usn.toUpperCase(),dept,notes,ts:Date.now(),status:"Active"};
+      const store=JSON.parse(localStorage.getItem("catRegs")||"[]"); store.push(entry); localStorage.setItem("catRegs", JSON.stringify(store));
+      status.textContent="Registered! You’ll receive updates via email.";
+      setTimeout(()=> closeModal('registerModal'), 900);
+    }
 
-    <!-- Departments -->
-    <section id="departments" class="glass card" style="margin-top:16px">
-      <h2>RNSIT BE Departments</h2>
-      <div id="deps-grid" class="grid"></div>
-    </section>
-  </main>
+    /* ===== Manage / Cancel ===== */
+    function loadMyRegistrations(){
+      const email=document.getElementById("manageEmail").value.trim();
+      const wrap=document.getElementById("myRegs"); wrap.innerHTML="";
+      if(!validateEmailStrict(email)){ wrap.innerHTML=`<div class="terms">Enter a valid email.</div>`; return; }
+      const store=JSON.parse(localStorage.getItem("catRegs")||"[]").filter(r=>r.email===email);
+      if(store.length===0){ wrap.innerHTML=`<div class="terms">No registrations found for ${email}.</div>`; return; }
+      wrap.innerHTML = store.map(r=>`
+        <div class="card" style="padding:10px">
+          <strong>${r.eventName}</strong><br>
+          <small class="terms">${new Date(r.ts).toLocaleString()} • Status: ${r.status}</small>
+          <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+            <select id="reason-${r.id}">
+              <option value="">Select reason</option>
+              <option>Medical emergency</option>
+              <option>Exam clash</option>
+              <option>Personal reasons</option>
+              <option>Other (explain)</option>
+            </select>
+            <button class="btn btn-outline btn-small" onclick="cancelReg('${r.id}')"><i class="fa-solid fa-ban"></i> Cancel</button>
+          </div>
+        </div>
+      `).join("");
+    }
+    function cancelReg(id){
+      const store=JSON.parse(localStorage.getItem("catRegs")||"[]");
+      const idx=store.findIndex(r=>r.id===id); if(idx<0) return;
+      const reasonSel=document.getElementById(`reason-${id}`); const reason=reasonSel?.value||"";
+      if(!reason){ alert("Please select a cancellation reason."); return; }
+      store[idx].status="Cancelled"; store[idx].cancelReason=reason;
+      localStorage.setItem("catRegs", JSON.stringify(store));
+      loadMyRegistrations();
+    }
 
-  <footer>© CAT • RNSIT</footer>
-</body>
-</html>
+    /* ===== Committees render + popup (NO dropdown) ===== */
+    const committeesGrid=document.getElementById("committeesGrid");
+    function renderCommittees(){
+      committeesGrid.innerHTML = COMMITTEES.map(c=>`
+        <div class="committee" onclick="openCommittee('${c.id}')">
+          <div class="icon"><i class="fa-solid fa-${c.icon}"></i></div>
+          <h4>${c.name}</h4>
+          <p>Tap to learn more</p>
+        </div>
+      `).join("");
+      anime({targets:'#committeesGrid .committee',opacity:[0,1],translateY:[18,0],duration:420,easing:'easeOutQuad',delay:(el,i)=>40*i});
+    }
+    renderCommittees();
+    function openCommittee(id){
+      const c=COMMITTEES.find(x=>x.id===id); if(!c) return;
+      document.getElementById("committeeTitle").innerHTML = `<i class="fa-solid fa-${c.icon}"></i> ${c.name}`;
+      const focusList=c.focus.map(f=>`<li>${f}</li>`).join("");
+      const toolsList=c.tools.map(t=>`<li>${t}</li>`).join("");
+      document.getElementById("committeeBody").innerHTML = `
+        <p class="terms" style="margin-bottom:8px">${c.intro}</p>
+        <div class="hero-card"><h4 style="margin:0 0 6px">Core responsibilities</h4><ul>${focusList}</ul></div>
+        <div class="hero-card" style="margin-top:10px"><h4 style="margin:0 0 6px">Typical tools</h4><ul>${toolsList}</ul></div>
+      `;
+      openModal('committeeModal','#committeeCard');
+    }
+
+    /* ===== Crew (members) — dropdown filter ONLY here, with your avatar ===== */
+    const membersGrid=document.getElementById("membersGrid");
+    const crewFilter = document.getElementById("crewFilter");
+    function renderMembers(list){
+      membersGrid.innerHTML = list.map(m=>`
+        <div class="member">
+          <img src="${DEFAULT_AVATAR}" alt="${m.name}">
+          <div class="name">${m.name}</div>
+          <div class="role">${m.role}</div>
+        </div>
+      `).join("");
+      anime({targets:'#membersGrid .member',opacity:[0,1],translateY:[14,0],duration:420,easing:'easeOutQuad',delay:(el,i)=>40*i});
+    }
+    renderMembers(MEMBERS);
+    crewFilter.addEventListener('change', (e)=>{
+      const v=e.target.value;
+      renderMembers(v==='all'?MEMBERS:MEMBERS.filter(m=>m.tier===v));
+    });
+
+    /* ===== Contact ===== */
+    function submitContact(){
+      const n=document.getElementById("cName").value.trim();
+      const e=document.getElementById("cEmail").value.trim();
+      const t=document.getElementById("cTopic").value.trim();
+      const m=document.getElementById("cMsg").value.trim();
+      const s=document.getElementById("cStatus");
+      if(!n || !validateEmailStrict(e) || !m){ s.textContent="Please fill the fields correctly."; return; }
+      const store=JSON.parse(localStorage.getItem("catContact")||"[]");
+      store.push({id:crypto.randomUUID(),n,e,t,m,ts:Date.now()});
+      localStorage.setItem("catContact", JSON.stringify(store));
+      s.textContent="Sent! CAT team will reach out.";
+    }
+
+    /* ===== Chat: web search integration (DuckDuckGo inline + Google fallback) ===== */
+    async function fetchInline(q){
+      try{
+        const res = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(q)}&format=json&no_redirect=1&no_html=1`);
+        const data = await res.json();
+        const items = [];
+        if (data.AbstractText && data.AbstractURL) {
+          items.push({title: data.Heading || 'Result', url: data.AbstractURL, snippet: data.AbstractText});
+        }
+        if (Array.isArray(data.RelatedTopics)) {
+          for (const t of data.RelatedTopics) {
+            if (t.Text && t.FirstURL) items.push({title: t.Text, url: t.FirstURL, snippet: t.Text});
+            if (items.length >= 5) break;
+          }
+        }
+        return items;
+      }catch(e){
+        return [];
+      }
+    }
+    function toggleChat(open){ document.getElementById("chatBox").classList.toggle("open", open); }
+    document.getElementById("chatOpen").addEventListener("click", ()=> toggleChat(true));
+    async function sendChat(){
+      const input = document.getElementById("chatInput");
+      const msg = input.value.trim();
+      if (!msg) return;
+
+      const body = document.getElementById("chatBody");
+      body.insertAdjacentHTML("beforeend", `<div class="bubble me">${msg}</div>`);
+      input.value = "";
+      body.scrollTop = body.scrollHeight;
+
+      const query = `${msg} RNSIT CAT`;
+      const results = await fetchInline(query);
+      if(results.length>0){
+        const html = results.map(r=>`
+          <div class="bubble">
+            <div style="font-weight:800">${r.title}</div>
+            <div class="terms">${r.snippet}</div>
+            <div style="margin-top:6px">
+              <a href="${r.url}" target="_blank" rel="noopener noreferrer" class="btn btn-outline"><i class="fa-solid fa-up-right-from-square"></i> Open</a>
+            </div>
+          </div>
+        `).join("");
+        body.insertAdjacentHTML("beforeend", html);
+        body.scrollTop=body.scrollHeight;
+      }else{
+        const url = "https://www.google.com/search?q=" + encodeURIComponent(query);
+        body.insertAdjacentHTML("beforeend", `<div class="bubble">Opening Google for more results…</div>`);
+        window.open(url, "_blank");
+        body.scrollTop=body.scrollHeight;
+      }
+    }
+
+    /* ===== Modals ===== */
+    function openModal(id, cardSel){
+      const modal=document.getElementById(id); modal.classList.add('open');
+      anime.set(cardSel,{scale:0.96,opacity:0,translateY:14});
+      anime({targets:cardSel,scale:1,opacity:1,translateY:0,duration:240,easing:'easeOutQuad'});
+      modal.addEventListener('click',(e)=>{ if(e.target===modal) closeModal(id); });
+    }
+    function closeModal(id){
+      const modal=document.getElementById(id); const card=modal.querySelector('.modal-card');
+      anime({targets:card,scale:0.96,opacity:0,translateY:14,duration:200,easing:'easeInQuad',complete:()=>modal.classList.remove('open')});
+    }
+  </script>
+
+  <!-- Firebase Auth (ES Modules) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBcHCDBg7FMk9ItN1851vujLqhQaLQ7wCY",
+      authDomain: "cat-rnsit.firebaseapp.com",
+      projectId: "cat-rnsit",
+      storageBucket: "cat-rnsit.firebasestorage.app",
+      messagingSenderId: "811409086978",
+      appId: "1:811409086978:web:6b085ea58b59e39415651b",
+      measurementId: "G-08WRHKJ4EX"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    const signInBtn  = document.getElementById("signInBtn");
+    const userBadge  = document.getElementById("userBadge");
+    const userBadgePhoto = document.getElementById("userBadgePhoto");
+    const userBadgeName = document.getElementById("userBadgeName");
+    const userMenu = document.getElementById("userMenu");
+    const userMenuStatus = document.getElementById("userMenuStatus");
+    const openProfileMenuBtn = document.getElementById("openProfileMenuBtn");
+    const menuSignOutBtn = document.getElementById("menuSignOutBtn");
+
+    const DEFAULT_AVATAR = "https://res.cloudinary.com/dx1wxv6ck/image/upload/v1766859521/user-account-icon-for-your-desig_kunqf7.png";
+
+    /* Local profile store by uid */
+    function saveLocalProfile(uid, obj){
+      const store = JSON.parse(localStorage.getItem("catProfiles")||"{}");
+      store[uid] = {...(store[uid]||{}), ...obj};
+      localStorage.setItem("catProfiles", JSON.stringify(store));
+    }
+    function loadLocalProfile(uid){
+      const store = JSON.parse(localStorage.getItem("catProfiles")||"{}");
+      return store[uid] || {};
+    }
+
+    function setUserBadge(u){
+      const photo = u.photoURL || DEFAULT_AVATAR;
+      userBadgePhoto.src = photo;
+      userBadgeName.textContent = u.displayName || u.email || "Student";
+      userBadge.style.display = "inline-flex";
+      signInBtn.style.display = "none";
+      userMenuStatus.textContent = `Signed in as ${u.email || 'user'}`;
+    }
+    function openProfile(u){
+      const local = loadLocalProfile(u.uid);
+      document.getElementById("profilePhoto").src = u.photoURL || DEFAULT_AVATAR;
+      document.getElementById("profileName").value = u.displayName || local.name || "";
+      document.getElementById("profilePhotoURL").value = u.photoURL || local.photoURL || "";
+      document.getElementById("profileEmail").value = u.email || "";
+      document.getElementById("profileYear").value = local.year || "";
+      document.getElementById("profileDept").value = local.dept || "";
+      document.getElementById("profileBio").value = local.bio || "";
+      openModal('profileModal','#profileCard');
+    }
+    async function saveProfile(){
+      const u = auth.currentUser; if(!u) return;
+      const name = document.getElementById("profileName").value.trim();
+      const photo = document.getElementById("profilePhotoURL").value.trim();
+      const year  = document.getElementById("profileYear").value.trim();
+      const dept  = document.getElementById("profileDept").value.trim();
+      const bio   = document.getElementById("profileBio").value.trim();
+
+      try{
+        await updateProfile(u, { displayName: name || u.displayName, photoURL: photo || u.photoURL });
+        saveLocalProfile(u.uid, { name, photoURL: photo, year, dept, bio });
+        setUserBadge(u);
+        document.getElementById("profilePhoto").src = u.photoURL || DEFAULT_AVATAR;
+        alert("Profile updated");
+      }catch(e){ alert("Update error: " + e.message); }
+    }
+
+    async function googleSignInStart(){
+      try {
+        const res = await signInWithPopup(auth, provider);
+        const u = res.user;
+        setUserBadge(u);
+        const wants = confirm("Do you want to receive CAT updates & newsletters?");
+        if(wants){
+          const store = JSON.parse(localStorage.getItem("catNews")||"[]");
+          const email = u.email || "";
+          if(email && !store.includes(email)) { store.push(email); localStorage.setItem("catNews", JSON.stringify(store)); alert("Subscribed to updates."); }
+        }
+        openProfile(u);
+      } catch (e) {
+        alert("Sign-in error: " + e.message);
+        console.error(e);
+      }
+    }
+    async function googleSignOut(){
+      try { await signOut(auth); userBadge.style.display="none"; signInBtn.style.display="inline-flex"; userMenu.classList.remove('open'); alert("Signed out"); }
+      catch(e){ alert("Sign-out error: " + e.message); }
+    }
+
+    // Navbar events
+    signInBtn?.addEventListener("click", googleSignInStart);
+    document.getElementById("saveProfileBtn").addEventListener("click", saveProfile);
+    document.getElementById("signOutProfileBtn").addEventListener("click", googleSignOut);
+
+    // User badge menu
+    userBadge.addEventListener('click', ()=> userMenu.classList.toggle('open'));
+    openProfileMenuBtn.addEventListener('click', ()=>{
+      userMenu.classList.remove('open');
+      const u = auth.currentUser;
+      if(u) openProfile(u);
+    });
+    menuSignOutBtn.addEventListener('click', ()=>{
+      userMenu.classList.remove('open');
+      googleSignOut();
+    });
+    document.addEventListener('click', (e)=>{
+      const within = userBadge.contains(e.target) || userMenu.contains(e.target);
+      if(!within) userMenu.classList.remove('open');
+    });
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserBadge(user);
+      } else {
+        userBadge.style.display = "none";
+        signInBtn.style.display = "inline-flex";
+        userMenu.classList.remove('open');
+        userMenuStatus.textContent = "Signed out";
+      }
+    });
+  </script>
+</
+  
+<!-- Firestore Bridge -->
+<script type="module">
+  import {
+    collection, addDoc, setDoc, doc,
+    getDocs, getDoc, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+  import { db } from "./firebase.js";
+
+  const BRIDGE_MAP = {
+    catRegs: { type: "collection" },
+    catNews: { type: "collection" },
+    catContact: { type: "collection" },
+    catProfiles: { type: "profileCollection" },
+  };
+
+  const normalizeEntry = (entry) => ({
+    ...entry,
+    ...(entry.email ? { email: entry.email.toLowerCase() } : {}),
+    ...(entry.usn ? { usn: entry.usn.toUpperCase() } : {}),
+  });
+
+  async function seedLocalStorageFromFirestore() {
+    try {
+      for (const key of ["catRegs", "catNews", "catContact"]) {
+        const snap = await getDocs(collection(db, key));
+        const arr = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        localStorage.setItem(key, JSON.stringify(arr));
+      }
+      console.log("[Bridge] Seeded localStorage from Firestore");
+    } catch (e) {
+      console.error("[Bridge] Seed failed:", e);
+    }
+  }
+
+  (function patchLocalStorage() {
+    const originalSetItem = localStorage.setItem.bind(localStorage);
+    localStorage.setItem = function (key, value) {
+      originalSetItem(key, value);
+      (async () => {
+        try {
+          const cfg = BRIDGE_MAP[key];
+          if (!cfg) return;
+          if (cfg.type === "collection") {
+            let arr = [];
+            try { arr = JSON.parse(value) || []; } catch {}
+            const last = Array.isArray(arr) && arr.length ? arr[arr.length - 1] : null;
+            if (last) {
+              await addDoc(collection(db, key), {
+                ...normalizeEntry(last),
+                bridgedAt: serverTimestamp(),
+              });
+            }
+          }
+          if (cfg.type === "profileCollection") {
+            let obj = {};
+            try { obj = JSON.parse(value) || {}; } catch {}
+            const email = (obj.email || "").toLowerCase();
+            if (!email) return;
+            await setDoc(doc(db, "catProfiles", email), {
+              ...normalizeEntry(obj),
+              updatedAt: serverTimestamp(),
+            }, { merge: true });
+          }
+        } catch (e) {
+          console.error(`[Bridge] Sync failed for ${key}:`, e);
+        }
+      })();
+    };
+    console.log("[Bridge] localStorage.setItem patched for Firestore sync");
+  })();
+
+  document.addEventListener("DOMContentLoaded", seedLocalStorageFromFirestore);
+</script>
+
+
