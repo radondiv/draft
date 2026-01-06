@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Digital LR – Exact Template Mode</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="print.css" media="print" />
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <h1>Digital LR (Template Mode)</h1>
+      <p class="subtitle">Use your LR artwork as background and fill fields exactly on top</p>
+    </div>
+    <nav class="actions">
+      <button id="signInBtn" class="secondary">Sign in</button>
+      <button id="signOutBtn" class="secondary" hidden>Sign out</button>
+      <button id="newLrBtn" class="primary">New LR</button>
+      <button id="saveLrBtn" class="primary" disabled>Save</button>
+      <button id="shareLrBtn" class="secondary" disabled>Share</button>
+      <button id="printLrBtn" class="secondary" disabled>Print</button>
+    </nav>
+  </header>
+
+  <main class="grid">
+    <section class="panel">
+      <h2>LR Details</h2>
+      <div id="authPanel" class="card info" hidden>
+        <p><strong>Signed in:</strong> <span id="userEmail"></span></p>
+      </div>
+
+      <form id="lrForm" autocomplete="off">
+        <fieldset>
+          <legend>General</legend>
+          <div class="row">
+            <label>CN Note No.
+              <input type="text" name="cnNoteNo" required />
+            </label>
+            <label>Date
+              <input type="date" name="date" required />
+            </label>
+            <label>Payment Term
+              <select name="paymentTerm" required>
+                <option value="TBB">TBB</option>
+                <option value="PAID">PAID</option>
+                <option value="TO PAY">TO PAY</option>
+              </select>
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Consignor & Consignee</legend>
+          <div class="row">
+            <label>Consignor
+              <select name="consignor" id="consignorSelect"></select>
+            </label>
+            <label>Consignor Address
+              <textarea name="consignorAddress" rows="2"></textarea>
+            </label>
+          </div>
+          <div class="row">
+            <label>Consignee
+              <select name="consignee" id="consigneeSelect"></select>
+            </label>
+            <label>Consignee Address
+              <textarea name="consigneeAddress" rows="2"></textarea>
+            </label>
+          </div>
+          <div class="row">
+            <label>From
+              <select name="fromLocation" id="fromSelect"></select>
+            </label>
+            <label>To
+              <select name="toLocation" id="toSelect"></select>
+            </label>
+          </div>
+          <div class="row">
+            <label>Invoice No.
+              <input type="text" name="invoiceNo" />
+            </label>
+            <label>Invoice Date
+              <input type="date" name="invoiceDate" />
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Insurance</legend>
+          <div class="row">
+            <label>Status
+              <select name="insured">
+                <option value="no">Not insured</option>
+                <option value="yes">Insured</option>
+              </select>
+            </label>
+            <label>Company
+              <input type="text" name="insuranceCompany" />
+            </label>
+            <label>Policy No.
+              <input type="text" name="policyNo" />
+            </label>
+            <label>Amount (₹)
+              <input type="number" name="insuranceAmount" step="0.01" />
+            </label>
+            <label>Risk
+              <input type="text" name="insuranceRisk" />
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Items</legend>
+          <table class="items" id="itemsTable">
+            <thead>
+              <tr>
+                <th>PKG/QTY</th>
+                <th>Material Type</th>
+                <th>Description</th>
+                <th>Actual Weight (kg)</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+          <div class="row">
+            <button type="button" id="addItemBtn" class="secondary">+ Add Item</button>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Charges & Remarks</legend>
+          <div class="row">
+            <label>Charges (₹)
+              <input type="number" name="charges" step="0.01" />
+            </label>
+            <label>Service Tax Payable By
+              <select name="serviceTaxBy">
+                <option value="Consignee">Consignee</option>
+                <option value="Consignor">Consignor</option>
+                <option value="Transporter">Transporter</option>
+              </select>
+            </label>
+          </div>
+          <label>Remarks
+            <textarea name="remarks" rows="3"></textarea>
+          </label>
+        </fieldset>
+
+        <details class="settings">
+          <summary>Presets & Company Settings</summary>
+          <div class="row">
+            <label>Company Name
+              <input type="text" id="companyName" placeholder="JAI AMBEY LOGISTICS SERVICE" />
+            </label>
+            <label>Header Address
+              <textarea id="companyAddress" rows="2"></textarea>
+            </label>
+          </div>
+          <div class="row">
+            <label>Email
+              <input type="email" id="companyEmail" />
+            </label>
+            <label>Phone
+              <input type="text" id="companyPhone" />
+            </label>
+          </div>
+          <div class="row">
+            <label>PAN
+              <input type="text" id="companyPAN" />
+            </label>
+            <label>GSTIN
+              <input type="text" id="companyGSTIN" />
+            </label>
+          </div>
+          <div class="row">
+            <label>Template Image URL (PNG/JPG)
+              <input type="url" id="templateUrl" placeholder="https://.../lr-template.png" />
+            </label>
+          </div>
+
+          <div class="presets-grid">
+            <div class="preset card">
+              <h3>Consignors</h3>
+              <div id="consignorList"></div>
+              <div class="row">
+                <input type="text" id="newConsignorName" placeholder="Name" />
+                <input type="text" id="newConsignorAddress" placeholder="Address" />
+                <button type="button" id="addConsignorBtn" class="secondary small">Add</button>
+              </div>
+            </div>
+            <div class="preset card">
+              <h3>Consignees</h3>
+              <div id="consigneeList"></div>
+              <div class="row">
+                <input type="text" id="newConsigneeName" placeholder="Name" />
+                <input type="text" id="newConsigneeAddress" placeholder="Address" />
+                <button type="button" id="addConsigneeBtn" class="secondary small">Add</button>
+              </div>
+            </div>
+            <div class="preset card">
+              <h3>Locations</h3>
+              <div id="locationList"></div>
+              <div class="row">
+                <input type="text" id="newLocation" placeholder="City / Warehouse" />
+                <button type="button" id="addLocationBtn" class="secondary small">Add</button>
+              </div>
+            </div>
+            <div class="preset card">
+              <h3>Vehicle Types</h3>
+              <div id="vehicleTypeList"></div>
+              <div class="row">
+                <input type="text" id="newVehicleType" placeholder="eg. 407, 14T, Container" />
+                <button type="button" id="addVehicleTypeBtn" class="secondary small">Add</button>
+              </div>
+            </div>
+            <div class="preset card">
+              <h3>Material Types</h3>
+              <div id="materialTypeList"></div>
+              <div class="row">
+                <input type="text" id="newMaterialType" placeholder="eg. Cartons, Drums" />
+                <button type="button" id="addMaterialTypeBtn" class="secondary small">Add</button>
+              </div>
+            </div>
+          </div>
+        </details>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2>Live Preview (Exact background)</h2>
+      <div class="preview-wrapper">
+        <iframe id="previewFrame" title="LR Preview"></iframe>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <small>© Jai Ambey Logistics Service — Digital LR (Template Mode)</small>
+  </footer>
+
+  <script type="module" src="firebase.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

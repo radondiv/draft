@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LR View (Template)</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="print.css" />
+  <style>
+    /* Absolute overlay fields over background template */
+    .canvas {
+      position: relative; width: 297mm; height: 210mm; background: white; overflow: hidden;
+      background-size: cover; background-position: center; background-repeat: no-repeat;
+      font: 12px/1.3 "Times New Roman", serif; color: black;
+    }
+    .field { position: absolute; white-space: pre-wrap; }
+    /* Example coordinates tuned to typical LR; adjust once with your template image */
+    /* Header meta */
+    #cnNoteNo { left: 230mm; top: 14mm; width: 55mm; text-align: right; }
+    #date { left: 230mm; top: 24mm; width: 55mm; text-align: right; }
+    #paymentTerm { left: 230mm; top: 34mm; width: 55mm; text-align: right; }
+    /* Consignor/Consignee */
+    #consignor { left: 10mm; top: 70mm; width: 130mm; }
+    #consignorAddress { left: 10mm; top: 80mm; width: 130mm; }
+    #consignee { left: 155mm; top: 70mm; width: 130mm; }
+    #consigneeAddress { left: 155mm; top: 80mm; width: 130mm; }
+    /* Route & invoice */
+    #fromLocation { left: 10mm; top: 100mm; width: 70mm; }
+    #toLocation { left: 85mm; top: 100mm; width: 70mm; }
+    #invoiceNo { left: 160mm; top: 100mm; width: 60mm; }
+    #invoiceDate { left: 225mm; top: 100mm; width: 60mm; }
+    /* Items table rows: we render as multi-line text for simplicity */
+    #items { left: 10mm; top: 118mm; width: 275mm; height: 60mm; }
+    /* Footer */
+    #vehicleNo { left: 10mm; top: 182mm; width: 60mm; }
+    #vehicleType { left: 72mm; top: 182mm; width: 60mm; }
+    #charges { left: 135mm; top: 182mm; width: 35mm; }
+    #remarks { left: 172mm; top: 182mm; width: 65mm; }
+    #serviceTaxBy { left: 240mm; top: 182mm; width: 40mm; }
+    #value { left: 240mm; top: 192mm; width: 40mm; }
+  </style>
+</head>
+<body class="printable">
+  <div id="canvas" class="canvas"></div>
+
+  <script type="module" src="firebase.js"></script>
+  <script type="module" src="view-template.js"></script>
+</body>
+</html>
