@@ -426,4 +426,152 @@
     }
   </script>
 </body>
+  
+<!-- Firebase Cloud Adapter: non-destructive, leaves original UI untouched -->
+<style>
+  /* minimal toolbar */
+  #lrCloudBar {
+    position: fixed; bottom: 12px; right: 12px; z-index: 9999;
+    background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 8px 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12); font-family: system-ui, Segoe UI, Roboto, Arial, sans-serif;
+    display: flex; gap: 8px; align-items: center;
+  }
+  #lrCloudBar button { padding: 6px 10px; font-size: 14px; }
+  #lrCloudBar .status { font-size: 12px; color: #666; }
+</style>
+
+<div id="lrCloudBar">
+  <button id="lrSignInBtn">Sign in</button>
+  <button id="lrSignOutBtn">Sign out</button>
+  <button id="lrSaveBtn">Save</button>
+  <button id="lrShareBtn">Share Link</button>
+  <span id="lrAuthStatus" class="status">Not signed in</span>
+  <span id="lrSaveStatus" class="status">Idle</span>
+</div>
+
+<script type="module">
+  // --- Firebase SDK v12.7.0 (matches your snippet) ---
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+  import { getFirestore, enableIndexedDbPersistence, collection, doc, setDoc, addDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
+  // --- Your Firebase config (from your message) ---
+  const firebaseConfig = {
+    apiKey: "AIzaSyBXqVfPkMqqQxNclyyYe0oM9o0eKIM2VwE",
+    authDomain: "lr-jails.firebaseapp.com",
+    projectId: "lr-jails",
+    storageBucket: "lr-jails.firebasestorage.app",
+    messagingSenderId: "716098447406",
+    appId: "1:716098447406:web:3e21b38cb09772b44e97bf",
+    measurementId: "G-M1QVW7SJTQ"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  enableIndexedDbPersistence(db).catch(err => console.warn("Persistence failed:", err));
+
+  // --- Helpers ---
+  const $ = (id) => document.getElementById(id);
+  const authStatus = $('lrAuthStatus');
+  const saveStatus = $('lrSaveStatus');
+
+  function sanitizeId(s) { return (s || '').trim().replace(/[^A-Za-z0-9_-]/g, '_'); }
+  function updateSaveStatus(msg) { saveStatus.textContent = msg; }
+
+  // Serialize ALL inputs/selects/textareas into a flat object keyed by id/name
+  function serializeForm(root = document) {
+    const fields = root.querySelectorAll('input, select, textarea');
+    const data = {};
+    fields.forEach(el => {
+      const key = el.id || el.name;
+      if (!key) return;
+      let val = el.value;
+      if (el.type === 'number') val = Number(val || 0);
+      data[key] = val;
+    });
+    return data;
+  }
+
+  // Fill back values into matching id/name fields
+  function fillForm(formData, root = document) {
+    Object.entries(formData || {}).forEach(([key, val]) => {
+      const el = root.getElementById?.(key) || root.querySelector(`[name="${key}"]`);
+      if (el) {
+        if (el.type === 'number') el.value = String(val ?? '');
+        else el.value = val ?? '';
+      }
+    });
+  }
+
+  // Try to discover CN Note No field by common ids/names used on your page
+  function getCnNoteValue() {
+    const candidates = ['cnNoteNo', 'CN NOTE NO', 'cn_no', 'cn', 'cnNote'];
+    for (const c of candidates) {
+      const el = document.getElementById(c) || document.querySelector(`[name="${c}"]`);
+      if (el && el.value) return el.value.trim();
+    }
+    // fallback: try label text match
+    const label = Array.from(document.querySelectorAll('label'))
+      .find(l => /cn\s*note\s*no/i.test(l.textContent || ''));
+    if (label) {
+      const forId = label.getAttribute('for');
+      const el = forId ? document.getElementById(forId) : label.nextElementSibling;
+      if (el && 'value' in el && el.value) return el.value.trim();
+    }
+    return '';
+  }
+
+  // --- Auth UI ---
+  let currentUser = null;
+  $('lrSignInBtn').onclick = async () => {
+    try { await signInWithPopup(auth, new GoogleAuthProvider()); }
+    catch (e) { console.error(e); alert("Sign in failed: " + (e?.message || e)); }
+  };
+  $('lrSignOutBtn').onclick = () => signOut(auth);
+
+  onAuthStateChanged(auth, async (user) => {
+    currentUser = user || null;
+    authStatus.textContent = user ? `Signed in: ${user.displayName || user.email}` : "Not signed in";
+    if (user) { await loadLRFromURL(); }
+  });
+
+  // --- Save / Share / Load ---
+  let currentLRId = null;
+
+  $('lrSaveBtn').onclick = async () => {
+    try {
+      if (!currentUser) return alert('Please sign in first.');
+      const form = serializeForm();
+      const cn = sanitizeId(getCnNoteValue());
+      let id = currentLRId || cn;
+      if (!id) {
+        const docRef = await addDoc(collection(db, 'lrs'), { ownerUid: currentUser.uid, createdAt: serverTimestamp() });
+        id = docRef.id;
+      }
+      currentLRId = id;
+      await setDoc(doc(db, 'lrs', id), {
+        ownerUid: currentUser.uid,
+        form,
+        updatedAt: serverTimestamp(),
+        createdAt: serverTimestamp()
+      }, { merge: true });
+      updateSaveStatus(`Saved (ID: ${id})`);
+    } catch (e) {
+      console.error(e);
+      alert('Save failed: ' + (e?.message || e));
+      updateSaveStatus('Error');
+    }
+  };
+
+  function lrShareURL(id) {
+    const u = new URL(location.href);
+    u.searchParams.set('lrId', id);
+    return u.toString();
+  }
+
+  $('lrShareBtn').onclick = () => {
+    if (!currentLRId) return alert('Save first to get an ID.');
+    const url = lrShareURL(currentLRId);
+
 </html>
