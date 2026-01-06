@@ -1,0 +1,16 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow authenticated users to read/write only their own LR documents
+    match /lrs/{lrId} {
+      allow read, write: if request.auth != null &&
+        (request.resource.data.ownerUid == request.auth.uid ||
+         resource.data.ownerUid == request.auth.uid);
+    }
+
+    // Presets can be read by any authenticated user, and written by them
+    match /presets/{collection}/{doc} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

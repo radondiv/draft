@@ -1,0 +1,7 @@
+
+@page { size: A4 landscape; margin: 10mm; }
+
+@media print {
+  body.printable { background: white; }
+  .a4-landscape { width: auto; height: auto; }
+}
